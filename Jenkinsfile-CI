@@ -1,0 +1,20 @@
+pipeline { 
+    agent any 
+    stages { 
+        stage('checkout'){
+            steps {
+            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/kliakos/sparkjava-war-example.git']]])
+            }
+        }
+        stage('Build'){
+            steps {
+            sh 'mvn package'
+            }
+        }
+        stage('uploadnexus'){
+           steps {
+           nexusArtifactUploader artifacts: [[artifactId: 'brk', classifier: '', file: 'target/sparkjava-hello-world-1.0.war', type: 'war']], credentialsId: 'brk_Nexus', groupId: 'brk', nexusUrl: '54.236.118.203:8081/nexus', nexusVersion: 'nexus2', protocol: 'http', repository: 'ram', version: '$BUILD_NUMBER'
+           }
+        }
+    }
+}
